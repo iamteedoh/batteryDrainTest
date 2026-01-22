@@ -1,0 +1,17 @@
+[package]
+name = "battery-drainer"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+num_cpus = "1.16.0"
+battery = "0.7"
+ratatui = { version = "0.26.0", features = ["all-widgets"] }
+crossterm = "0.27.0"
+clap = { version = "4.5.4", features = ["derive"] }
+sysinfo = "0.30.12"
+chrono = "0.4.38"
+csv = "1.3.0"
+serde = { version = "1.0", features = ["derive"] }
