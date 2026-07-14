@@ -8,5 +8,6 @@
       "package-name": "batteryDrainTest",
       "extra-files": ["battery-drainer/Cargo.toml"]
     }
-  }
+  },
+  "include-component-in-tag": false
 }
