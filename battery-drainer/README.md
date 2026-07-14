@@ -112,7 +112,7 @@ flowchart TB
 [dependencies]
 ratatui = { version = "0.26.0", features = ["all-widgets"] }
 crossterm = "0.27.0"
-battery = "0.7.8"
+battery = "0.7"
 num_cpus = "1.16.0"
 clap = { version = "4.5.4", features = ["derive"] }
 sysinfo = "0.30.12"
@@ -132,7 +132,8 @@ serde = { version = "1.0", features = ["derive"] }
 
 ```bash
 # Clone the repository
-cd battery-drainer
+git clone https://github.com/iamteedoh/batteryDrainTest.git
+cd batteryDrainTest/battery-drainer
 
 # Build release version
 cargo build --release
@@ -246,7 +247,7 @@ timestamp,percentage,drain_rate,cpu_usage,memory_usage,cpu_temp,battery_temp,clo
 ```
 battery-drainer/
 ├── Cargo.toml          # Project manifest
-├── Cargo.lock          # Dependency lock file
+├── Cargo.lock          # Dependency lock file (committed for reproducible builds)
 ├── README.md           # This file
 └── src/
     └── main.rs         # Single-file application
@@ -328,8 +329,10 @@ This approach provides stable readings because:
 
 ## License
 
-MIT License
+This project is licensed under the [GNU General Public License v3](../LICENSE).
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! See [CONTRIBUTING.md](../CONTRIBUTING.md) for local
+setup, the validation suite, and the pull request process. To report a
+security issue privately, follow [SECURITY.md](../SECURITY.md).

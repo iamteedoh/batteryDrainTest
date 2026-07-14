@@ -1,0 +1,8 @@
+## Author: Tito Valentin
+## Name of Program: batteryDrainTest Gitleaks Configuration
+## Date Created: 2026-07-13
+## Description: Extends the default Gitleaks rules for repository history scans.
+title = "batteryDrainTest gitleaks configuration"
+
+[extend]
+useDefault = true

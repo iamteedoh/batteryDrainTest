@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "rust",
+  "bump-minor-pre-major": true,
+  "bootstrap-sha": "ae74e90f6bce0231a1df80b430daad5d3f3a2442",
+  "packages": {
+    ".": {
+      "package-name": "batteryDrainTest",
+      "extra-files": ["battery-drainer/Cargo.toml"]
+    }
+  }
+}

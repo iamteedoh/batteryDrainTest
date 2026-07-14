@@ -1,0 +1,80 @@
+name: Bug report
+description: Report a reproducible batteryDrainTest problem
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Do not paste tokens, passwords,
+        SSH keys, or private host details.
+
+  - type: input
+    id: version
+    attributes:
+      label: batteryDrainTest version
+      description: Provide a release tag or commit SHA.
+      placeholder: v0.1.0 or 0123456
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Drain mode (CPU load and live monitoring)
+        - Plot mode (CSV playback)
+        - Drain rate calculation
+        - CSV logging or log format
+        - TUI rendering
+        - Build or dependencies
+        - CI or release automation
+        - Documentation
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include the OS version, Rust toolchain version, terminal emulator, and laptop or battery hardware details. Redact private details.
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the observed and expected behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run ...
+        2. Observe ...
+        3. Expected ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant redacted output
+      description: Remove secrets and private details before pasting. CSV log excerpts are welcome.
+      render: shell
