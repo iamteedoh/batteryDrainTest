@@ -15,6 +15,10 @@ The application lives in the [`battery-drainer/`](battery-drainer/) crate. See
 [battery-drainer/README.md](battery-drainer/README.md) for full documentation:
 features, architecture, UI layout, controls, and the CSV log format.
 
+<p align="center">
+  <img src="docs/hero.png" alt="Battery Drainer live dashboard: a BATTERY DRAINER banner above real-time battery, CPU, and memory gauges and a time-series chart" width="100%">
+</p>
+
 ## Quick start
 
 ```bash
