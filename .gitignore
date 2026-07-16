@@ -34,3 +34,5 @@ Thumbs.db
 
 # Generated images/outputs
 *.png
+# ...but keep documentation assets (e.g. the README hero image)
+!docs/hero.png

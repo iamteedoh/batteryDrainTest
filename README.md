@@ -1,5 +1,9 @@
 # batteryDrainTest
 
+<p align="center">
+  <img src="docs/hero.png" alt="Battery Drainer live dashboard: a BATTERY DRAINER banner above real-time battery, CPU, and memory gauges and a time-series chart" width="100%">
+</p>
+
 [![CI](https://github.com/iamteedoh/batteryDrainTest/actions/workflows/ci.yml/badge.svg)](https://github.com/iamteedoh/batteryDrainTest/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue)
 [![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-%E2%9D%A4-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/iamteedoh)
