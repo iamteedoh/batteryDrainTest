@@ -4,7 +4,18 @@ A terminal-based battery drain testing and monitoring tool built in Rust. This a
 
 ## Features
 
+- **Big, Beautiful UI**: A block-font splash title with a description, and a
+  rounded, color-coded live dashboard header
+- **Interactive & Non-Interactive**: A full-screen TUI by default, or a
+  `--headless` mode that streams plain-text status to stdout (ideal for SSH/CI)
 - **CPU Load Generation**: Spawns CPU-intensive threads on all available cores
+- **Pause/Resume the Load**: Toggle the CPU burn on the fly without leaving the
+  dashboard (`space` / `p`)
+- **Monitor-Only Mode**: `--no-load` watches natural battery drain without
+  adding any CPU load
+- **Auto-Stop & Summary**: `--duration <MINUTES>` ends the run automatically and
+  prints a session summary (drained %, average rate, peak temps)
+- **Configurable Threads & Log Path**: `--threads <N>` and `--output <FILE>`
 - **Real-time Monitoring**: Battery percentage, drain rate, CPU/memory usage, temperatures
 - **Live Visualization**: TUI-based charts and gauges using Ratatui
 - **Data Logging**: Automatic CSV logging for later analysis
@@ -51,11 +62,17 @@ This method:
 ```mermaid
 flowchart TB
     subgraph Main["Main Entry Point"]
-        A[Parse CLI Args] --> B{Plot Mode?}
+        A[Parse CLI Args] --> B{Mode?}
+    end
+
+    subgraph HeadlessMode["Headless Mode (--headless)"]
+        B -->|Headless| HA[Print Banner] --> HB[Spawn CPU Threads]
+        HB --> HC[Tick Loop: log + stream status]
+        HC --> HD[Print Session Summary]
     end
 
     subgraph DrainMode["Drain Mode"]
-        B -->|No| C[Spawn CPU Threads]
+        B -->|Interactive| SP[Show Splash Title] --> C[Spawn CPU Threads]
         C --> D[Initialize App State]
         D --> E[Setup Terminal TUI]
         E --> F[Event Loop]
@@ -72,8 +89,8 @@ flowchart TB
         end
     end
 
-    subgraph PlotMode["Plot Mode"]
-        B -->|Yes| N[Load CSV File]
+    subgraph PlotMode["Plot Mode (--plot)"]
+        B -->|Plot| N[Load CSV File]
         N --> O[Parse Log Entries]
         O --> P[Initialize Playback State]
         P --> Q[Setup Terminal TUI]
@@ -143,6 +160,19 @@ cargo build --release
 
 ## Usage
 
+### Command-Line Options
+
+| Option | Description |
+|--------|-------------|
+| `-p, --plot <FILE>` | Replay a previously recorded CSV log instead of draining |
+| `-H, --headless` | Run without the TUI; stream status to stdout (SSH/CI friendly) |
+| `-d, --duration <MINUTES>` | Stop automatically after N minutes (`0` = run until you quit) |
+| `-t, --threads <N>` | Number of CPU load threads (default: one per logical core) |
+| `--no-load` | Monitor the battery only — spawn no CPU load threads |
+| `-o, --output <FILE>` | Log file path (default: `drain_log_<timestamp>.csv`) |
+| `-h, --help` | Print help |
+| `-V, --version` | Print version |
+
 ### Drain Mode (Default)
 
 Run the application to start draining the battery and monitoring:
@@ -155,6 +185,22 @@ Or run the compiled binary:
 
 ```bash
 ./target/release/battery-drainer
+```
+
+On launch you'll see a big block-font **BATTERY DRAINER** splash with a short
+description; press any key (or wait a moment) to drop into the live dashboard.
+
+Useful variations:
+
+```bash
+# Stop automatically after 15 minutes and print a session summary
+./target/release/battery-drainer --duration 15
+
+# Only monitor natural drain — do not add CPU load
+./target/release/battery-drainer --no-load
+
+# Use 4 load threads and a custom log path
+./target/release/battery-drainer --threads 4 --output my_run.csv
 ```
 
 #### Drain Mode UI Layout
@@ -185,7 +231,37 @@ Or run the compiled binary:
 
 | Key | Action |
 |-----|--------|
+| `space` / `p` | Pause / resume the CPU load (dashboard keeps running) |
 | `q` | Quit and save log |
+
+### Headless (Non-Interactive) Mode
+
+For servers, SSH sessions, or CI where a TUI isn't practical, run with
+`--headless`. It prints the title banner, streams a compact status line every
+10 seconds, and prints a session summary when it stops:
+
+```bash
+# Drive the battery down for 10 minutes with no TUI
+./target/release/battery-drainer --headless --duration 10
+```
+
+```
+[0h 00m 10s]  Battery  82.0%  Drain  0.00%/min (avg  0.00)  CPU  99%  Mem  41%  CPU  72°C  Batt 38°C
+...
+==================== Session Summary ====================
+Duration:        0h 10m 00s (600 samples)
+Battery:         85.0% -> 71.0%  (drained 14.0%)
+Avg drain rate:  1.40 %/min
+Est. full drain: 0h 50m 42s
+Peak CPU usage:  99%
+Peak CPU temp:   88°C
+Peak batt temp:  39°C
+=========================================================
+```
+
+Without `--duration`, headless mode runs until you press `Ctrl-C` (the CSV is
+flushed every second, so no data is lost). Provide `--duration` for a clean,
+automatic stop with a printed summary.
 
 ### Plot Mode (Playback)
 
