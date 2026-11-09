@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Owner-only: files a GitHub issue in the maintainer's private tracker. GitHub only shows
+# "Run workflow" to users with write access, and the job also refuses anyone but the owner.
+# The request is signed with a shared secret; the tracker reads the issue from GitHub itself.
+---
+name: File private ticket
+
+"on":
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: Issue number
+        required: true
+        type: number
+      type:
+        description: Ticket type (auto follows the issue's bug / enhancement labels)
+        type: choice
+        default: auto
+        options: [auto, Bug, Feature, Task]
+      priority:
+        description: Priority
+        type: choice
+        default: Medium
+        options: [Medium, Low, High, Urgent]
+
+permissions: {}
+
+jobs:
+  file:
+    name: File private ticket
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Send the issue to the private tracker
+        env:
+          INTAKE_URL: ${{ secrets.TICKET_INTAKE_URL }}
+          INTAKE_SECRET: ${{ secrets.TICKET_INTAKE_SECRET }}
+          REPO: ${{ github.repository }}
+          ISSUE: ${{ inputs.issue }}
+          TICKET_TYPE: ${{ inputs.type }}
+          PRIORITY: ${{ inputs.priority }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, hmac, json, os, sys, time, uuid, urllib.error, urllib.request
+
+          env = os.environ
+          if not env.get("INTAKE_URL") or not env.get("INTAKE_SECRET"):
+              sys.exit("::error::TICKET_INTAKE_URL / TICKET_INTAKE_SECRET are not set in this repo's Actions secrets.")
+          body = json.dumps({"repo": env["REPO"], "issue": int(float(env["ISSUE"])), "type": env["TICKET_TYPE"],
+                             "priority": env["PRIORITY"], "ts": int(time.time()), "nonce": uuid.uuid4().hex},
+                            separators=(",", ":")).encode()
+          sig = hmac.new(env["INTAKE_SECRET"].encode(), body, hashlib.sha256).hexdigest()
+          req = urllib.request.Request(env["INTAKE_URL"], data=body, method="POST",
+                                       headers={"Content-Type": "application/json",
+                                                # Cloudflare blocks Python's default urllib User-Agent (403)
+                                                "User-Agent": "teedohlabs-ticket-button/1.0 (+github-actions)",
+                                                "X-Intake-Signature": "sha256=" + sig})
+          try:
+              with urllib.request.urlopen(req, timeout=60) as resp:
+                  result = json.load(resp)
+          except urllib.error.HTTPError as err:
+              try:
+                  detail = json.load(err).get("error", "")
+              except ValueError:
+                  detail = ""
+              sys.exit(f"::error::The tracker refused the request ({err.code}). {detail}")
+          except (urllib.error.URLError, TimeoutError) as err:
+              sys.exit(f"::error::No answer from the tracker ({err}). Run this again later: if the ticket was "
+                       "created, the rerun returns its key instead of creating a second one.")
+          # Run logs are public on public repos, so the private ticket key is never printed.
+          issue = json.loads(body)["issue"]
+          line = f"{env['REPO']}#{issue}: " + ("filed" if result.get("created") else "already filed earlier")
+          print(line)
+          with open(env["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write(line + "\n")
+          PY
